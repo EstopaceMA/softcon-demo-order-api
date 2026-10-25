@@ -1,0 +1,197 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}",
+    "env": {
+      "PATH": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}:${config:terminal.integrated.env.osx.ORDER_API_FUNC_BIN}:${env:PATH}",
+      "ORDER_API_FUNC": "${config:azureFunctions.funcCliPath}",
+      "FUNCTIONS_CORE_TOOLS_TELEMETRY_OPTOUT": "1"
+    },
+    "shell": { "executable": "/bin/zsh", "args": ["-f", "-c"] }
+  },
+  "tasks": [
+    {
+      "label": "softcon-demo-order-api: bootstrap",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": ["scripts/debug-bootstrap.mjs"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm clean",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "clean"
+      ],
+      "dependsOn": "softcon-demo-order-api: bootstrap",
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm watch",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "watch",
+        "--",
+        "--noEmitOnError"
+      ],
+      "dependsOn": "softcon-demo-order-api: npm clean",
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*(?:Starting compilation in watch mode|File change detected\\. Starting incremental compilation).*$",
+          "endsPattern": "^.*Found 0 errors\\. Watching for file changes\\..*$"
+        }
+      },
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: func host start",
+      "type": "func",
+      "command": "host start",
+      "args": ["--port", "3000"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "/bin/zsh", "args": ["-f", "-c"] },
+        "env": {
+          "PATH": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}:${config:terminal.integrated.env.osx.ORDER_API_FUNC_BIN}:${env:PATH}",
+          "languageWorkers__node__arguments": "--inspect=127.0.0.1:9229",
+          "FUNCTIONS_WORKER_PROCESS_COUNT": "1",
+          "FUNCTIONS_CORE_TOOLS_TELEMETRY_OPTOUT": "1"
+        }
+      },
+      "dependsOn": "softcon-demo-order-api: npm watch",
+      "isBackground": true,
+      "problemMatcher": "$func-node-watch",
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm build",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build"
+      ],
+      "problemMatcher": "$tsc",
+      "group": "build",
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm typecheck",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "typecheck"
+      ],
+      "problemMatcher": "$tsc",
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm lint",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "lint"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm format:check",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "format:check"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm validate:openapi",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "validate:openapi"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm test",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "test"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm test:watch",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:watch"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vitest",
+        "pattern": { "regexp": "^(?!)(.*)(.*)$", "file": 1, "message": 2 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*(?:DEV|RERUN).*$",
+          "endsPattern": "^.*(?:PASS|FAIL).*Waiting for file changes.*$"
+        }
+      },
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm test:coverage",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:coverage"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    },
+    {
+      "label": "softcon-demo-order-api: npm test:smoke (owned host)",
+      "detail": "Stop the debug host first. Owns a fresh localhost:3000 host; never tests an existing host.",
+      "type": "process",
+      "command": "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/node",
+      "args": [
+        "${config:terminal.integrated.env.osx.ORDER_API_NODE_BIN}/../lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:smoke"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1, "instancePolicy": "silent" }
+    }
+  ]
+}

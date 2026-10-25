@@ -1,0 +1,46 @@
+{
+  "name": "softcon-demo-order-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Process-local Order Management API using Azure Functions v4",
+  "type": "commonjs",
+  "main": "dist/functions/*.js",
+  "engines": {
+    "node": ">=24.0.0 <25",
+    "npm": ">=11 <12"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "tsc --build tsconfig.json --clean",
+    "watch": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "prestart": "npm run build",
+    "start": "func start --port 3000",
+    "lint": "eslint src tests vitest.config.mts",
+    "format:check": "prettier --check src tests package.json tsconfig.json tsconfig.test.json vitest.config.mts host.json local.settings.example.json eslint.config.mjs scripts openapi.yaml order-api.postman_collection.json .vscode",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "pretest:smoke": "npm run build",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "validate:openapi": "node scripts/validate-openapi.cjs"
+  },
+  "dependencies": {
+    "@azure/functions": "4.17.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.0.5",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "eslint": "10.13.0",
+    "openapi-types": "12.1.3",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "5.0.5"
+  }
+}

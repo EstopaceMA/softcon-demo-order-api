@@ -1,0 +1,17 @@
+.azure/
+.github/
+.vscode/
+coverage/
+node_modules/
+scripts/
+tests/
+local.settings.json
+.env
+.env.*
+*.log
+README.md
+openapi.yaml
+*.postman_collection.json
+tsconfig.test.json
+vitest.config.mts
+eslint.config.mjs

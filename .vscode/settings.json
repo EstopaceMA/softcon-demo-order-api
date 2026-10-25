@@ -1,0 +1,23 @@
+{
+  "chat.agent.maxRequests": 9999,
+  "azureFunctions.projectLanguage": "TypeScript",
+  "azureFunctions.projectLanguageModel": 4,
+  "azureFunctions.projectRuntime": "~4",
+  "azureFunctions.projectSubpath": ".",
+  "azureFunctions.funcCliPath": "/Users/markanthonyestopace/.local/share/softcon-tools/core-tools-4.16.0/func",
+  "azureFunctions.stopFuncTaskPostDebug": true,
+  "azureFunctions.showProjectWarning": false,
+  "azureFunctions.validateEmulators": false,
+  "debug.onTaskErrors": "debugAnyway",
+  "files.exclude": { "**/node_modules": true },
+  "terminal.integrated.env.osx": {
+    "ORDER_API_NODE_BIN": "/Users/markanthonyestopace/.nvm/versions/node/v24.11.1/bin",
+    "ORDER_API_FUNC_BIN": "/Users/markanthonyestopace/.local/share/softcon-tools/core-tools-4.16.0",
+    "ORDER_API_FUNC": "/Users/markanthonyestopace/.local/share/softcon-tools/core-tools-4.16.0/func",
+    "PATH": "/Users/markanthonyestopace/.nvm/versions/node/v24.11.1/bin:/Users/markanthonyestopace/.local/share/softcon-tools/core-tools-4.16.0:${env:PATH}"
+  },
+  "terminal.integrated.profiles.osx": {
+    "Order API (Node 24)": { "path": "/bin/zsh", "args": ["-f"] }
+  },
+  "terminal.integrated.defaultProfile.osx": "Order API (Node 24)"
+}

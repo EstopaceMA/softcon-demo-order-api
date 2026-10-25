@@ -1,0 +1,234 @@
+openapi: 3.0.3
+info:
+  title: Order Management API
+  version: 1.0.0
+  description: >-
+    HTTP-only, process-local in-memory order demo. Data starts empty, is lost on
+    restart, and is not shared across processes or scale-out instances.
+    Core Tools disables authentication locally by default. Hosted functions use
+    function-level authentication and require a function key in the
+    x-functions-key header or code query parameter. The optional security scheme
+    below documents hosted access; no key is required by this localhost contract.
+servers:
+  - url: http://localhost:3000
+    description: Local Azure Functions Core Tools, with authentication disabled
+security: []
+paths:
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List orders
+      description: >-
+        Optionally filter by an exact, case-sensitive status. Total is the number
+        of orders returned after filtering. No ordering guarantee or pagination.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/OrderStatus"
+      responses:
+        "200":
+          description: Orders matching the filter, or an empty list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      operationId: createOrder
+      summary: Create an order
+      description: >-
+        Creates an order with a server-generated opaque ID, pending status, and
+        UTC timestamp. Unknown request properties are accepted and stripped;
+        they cannot override server-owned fields.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrder"
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /orders/{orderId}:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    get:
+      operationId: getOrder
+      summary: Get an order
+      responses:
+        "200":
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /orders/{orderId}/status:
+    parameters:
+      - $ref: "#/components/parameters/OrderId"
+    patch:
+      operationId: updateOrderStatus
+      summary: Update only an order's status
+      description: >-
+        Any documented status is allowed, including the current status. Preserves
+        orderId, customerName, items, and createdAt. Unknown body properties are
+        accepted and stripped rather than applied to the order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatus"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    functionKey:
+      type: apiKey
+      in: header
+      name: x-functions-key
+      description: >-
+        Required by hosted function-level authentication, not by the default
+        local Core Tools host. Hosted access also accepts the code query parameter.
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      description: Opaque string identifier; no UUID format restriction
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Malformed JSON or invalid body, path parameters, or status filter
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Invalid request
+    NotFound:
+      description: No order has this identifier
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Order not found
+    InternalServerError:
+      description: Unexpected application failure; diagnostic details are not exposed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Internal server error
+  schemas:
+    OrderStatus:
+      type: string
+      enum:
+        - pending
+        - processing
+        - shipped
+        - delivered
+        - cancelled
+    OrderItem:
+      type: object
+      required:
+        - name
+        - quantity
+      properties:
+        name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+    CreateOrder:
+      type: object
+      required:
+        - customerName
+        - items
+      properties:
+        customerName:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItem"
+    UpdateOrderStatus:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+    Order:
+      type: object
+      required:
+        - orderId
+        - customerName
+        - items
+        - status
+        - createdAt
+      properties:
+        orderId:
+          type: string
+        customerName:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        createdAt:
+          type: string
+          format: date-time
+    OrderList:
+      type: object
+      required:
+        - orders
+        - total
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+          description: Number of orders in this response
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

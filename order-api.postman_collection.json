@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "SoftCon Demo Order API",
+    "description": "Import this collection, set the functionKey collection variable to the Function App default host key, then run Create order first. Every request sends x-functions-key using that variable. The create post-response script saves the returned orderId for Get order and Update order status. Orders are stored in memory and can disappear after a restart or scale-out.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://softcon-demo-order-api-h4d4bwgtbnbxa9e2.southeastasia-01.azurewebsites.net",
+      "type": "string"
+    },
+    {
+      "key": "functionKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "replace-with-created-order-id",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-functions-key",
+            "value": "{{functionKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerName\": \"Alex Rivera\",\n  \"items\": [\n    {\n      \"name\": \"Notebook\",\n      \"quantity\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/orders",
+        "description": "Creates a pending order. A successful response saves orderId as a collection variable."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  const order = pm.response.json();",
+              "  pm.collectionVariables.set('orderId', order.orderId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get order",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-functions-key",
+            "value": "{{functionKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}",
+        "description": "Retrieves the order created by the first request."
+      }
+    },
+    {
+      "name": "Update order status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "x-functions-key",
+            "value": "{{functionKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"processing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "description": "Updates the created order to processing."
+      }
+    },
+    {
+      "name": "List orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-functions-key",
+            "value": "{{functionKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/orders",
+        "description": "Returns all orders in the current worker's memory."
+      }
+    },
+    {
+      "name": "List processing orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-functions-key",
+            "value": "{{functionKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/orders?status=processing",
+        "description": "Filters orders by the exact processing status."
+      }
+    }
+  ]
+}
